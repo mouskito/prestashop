@@ -59,20 +59,19 @@ php -r "unlink('composer-setup.php');"
 sudo mv composer.phar /usr/local/bin/composer
 
 echo -e "$Cyan \n Removing apache files $Color_Off"
-# sudo rm /etc/php/7.0/apache2/php.ini /etc/php/7.0/cli/php.ini /etc/hosts
+sudo rm /etc/php5/apache2/php.ini /etc/php5/cli/php.ini /etc/hosts
 
-# echo -e "$Cyan \n Adding apache sites configuration $Color_Off"
-# sudo cp /var/www/vagrant-stuffs/apache-conf/pleaky.conf /etc/apache2/sites-available/
-# sudo cp /var/www/vagrant-stuffs/apache-conf/platform-pleaky.conf /etc/apache2/sites-available/
-# sudo cp /var/www/vagrant-stuffs/apache-conf/iknsa-idp.conf /etc/apache2/sites-available/
-# echo -e "$Cyan \n Adding apache config files php.ini and hosts $Color_Off"
-# sudo cp /var/www/vagrant-stuffs/apache-conf/cli-php.ini /etc/php/7.0/cli/php.ini
-# sudo cp /var/www/vagrant-stuffs/apache-conf/apache-php.ini /etc/php/7.0/apache2/php.ini
-# sudo cp /var/www/vagrant-stuffs/apache-conf/hosts /etc/hosts
+echo -e "$Cyan \n Adding apache sites configuration $Color_Off"
+sudo cp /var/www/vagrant-stuffs/apache-conf/transmeo.conf /etc/apache2/sites-available/
 
-# echo -e "$Cyan \n Enabling apache sites $Color_Off"
-# sudo a2ensite pleaky.conf platform-pleaky.conf iknsa-idp.conf
-# sudo a2enmod rewrite
+echo -e "$Cyan \n Adding apache config files php.ini and hosts $Color_Off"
+sudo cp /var/www/vagrant-stuffs/apache-conf/cli-php.ini /etc/php5/cli/php.ini
+sudo cp /var/www/vagrant-stuffs/apache-conf/apache-php.ini /etc/php5/apache2/php.ini
+sudo cp /var/www/vagrant-stuffs/apache-conf/hosts /etc/hosts
+
+echo -e "$Cyan \n Enabling apache sites $Color_Off"
+sudo a2ensite transmeo.conf
+sudo a2enmod rewrite
 sudo service apache2 restart
 
 echo -e "$Cyan \n Adding rsa key to ssh agent $Color_Off"
@@ -83,6 +82,8 @@ cp /var/www/vagrant-stuffs/id_rsa ~/.ssh
 echo -e "$Cyan \n Change rsa key mode to 400 $Color_Off"
 chmod 400 ~/.ssh/id_rsa
 echo -e "$Cyan \n Add rsa key to ssh agent $Color_Off"
+
+eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_rsa
 
 sudo apt-get install git -y

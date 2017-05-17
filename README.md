@@ -22,12 +22,12 @@ and accept with yes
 Clone the repository
 
 ```
-git clone git@github.com:iknsa-corp/pleaky-installation.git
+git clone git@github.com:iknsa-corp/cardif-transmeo-installation.git
 ```
 Go into the newly cloned repository 
 
 ```
-cd pleaky-installation
+cd cardif-transmeo-installation
 ```
 
 Then launch the install bash file 
@@ -51,14 +51,6 @@ Connect to your vagrant:
 ```
 vagrant ssh
 ```
-
-Compile .scss and .ts files with
-
-```
-npm run dev
-```
-
-When working on pleaky, the `npm run dev` should be up and running for live compilation
 
 If you have any problems
 ```
