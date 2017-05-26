@@ -92,6 +92,7 @@ ssh-keyscan -H github.com >> ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
 
 cd /var/www/transmeo
 
+npm install
 composer install
 bower install
 
