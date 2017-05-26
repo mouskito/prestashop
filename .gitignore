@@ -2,3 +2,4 @@ transmeo/
 vagrant-stuffs/id_rsa
 .vagrant/
 html
+.idea
