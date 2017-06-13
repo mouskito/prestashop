@@ -90,7 +90,7 @@ sudo apt-get install git -y
 
 ssh-keyscan -H github.com >> ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
 
-cd /var/www/transmeo
+cd /var/www/cardif
 
 npm install
 composer install
