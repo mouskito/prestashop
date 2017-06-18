@@ -1,5 +1,6 @@
 127.0.0.1	localhost
-192.168.33.10   cardif.dev
+192.168.33.10   data-analytics-projects.dev
+192.168.33.10   transmeo.dev
 
 # The following lines are desirable for IPv6 capable hosts
 ::1	ip6-localhost	ip6-loopback

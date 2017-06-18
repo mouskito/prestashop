@@ -14,9 +14,10 @@ Cyan='\033[0;36m'         # Cyan
 #** Fix locale Mac Lion notice
 #********************************************************************
 sudo locale-gen
+sudo apt-get install vim
 
 echo -e "$Cyan \n Add php apt repository $Color_Off"
-sudo add-apt-repository ppa:ondrej/php5-5.6 -y
+sudo add-apt-repository ppa:ondrej/php -y
 sudo apt-get install python-software-properties
 
 # Update packages and Upgrade system
@@ -27,29 +28,16 @@ echo -e "$Cyan \n MySQL Config $Color_Off"
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password paris'
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password paris'
 sudo apt-get install -y mysql-server
+sudo mysqld --initialize
 
 ## Install LAMP
-echo -e "$Cyan \n Installing Apache2 and PHP $Color_Off"
-sudo apt-get install vim apache2 php5 libapache2-mod-php5 -y mysql-server
-
+echo -e "$Cyan \n Installing Apache2 $Color_Off"
+sudo apt-get install apache2 -y
 sudo service apache2 restart
 
 echo -e "$Cyan \n Installing PHP extensions $Color_Off"
-sudo apt-get install -y libcurl4-openssl-dev pkg-config libssl-dev libsslcommon2-dev curl php5-curl libcurl4-doc libcurl3-dbg libidn11-dev libkrb5-dev libldap2-dev librtmp-dev php5-mysql php5-mcrypt php5-cli php5-dev php5-common php5-gd php5-cgi
-
-sudo mysql_install_db
-
-Installing ruby for SASS and Compass support
-echo -e "$Cyan \n Installing ruby for SASS and Compass support $Color_Off"
-sudo apt-get install ruby-full -y
-sudo gem update -f
-sudo gem install compass
-
-echo -e "$Cyan \n NodeJS and npm install $Color_Off"
-sudo apt-get install nodejs npm -y
-sudo ln -s /usr/bin/nodejs /usr/bin/node
-
-sudo npm install -g typescript gulp-cli concurrently typings grunt-cli bower
+sudo apt install --no-install-recommends php7.1 libapache2-mod-php7.1 php7.1-mysql php7.1-curl php7.1-json php7.1-gd php7.1-mcrypt php7.1-msgpack php7.1-memcached php7.1-intl php7.1-sqlite3 php7.1-gmp php7.1-geoip php7.1-mbstring php7.1-redis php7.1-xml php7.1-zip
+sudo apt-get install -y libcurl4-openssl-dev pkg-config libssl-dev libsslcommon2-dev curl libcurl4-doc libcurl3-dbg libidn11-dev libkrb5-dev libldap2-dev librtmp-dev php-cli php-dev php-common php-cgi
 
 #Install composer 
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -59,18 +47,19 @@ php -r "unlink('composer-setup.php');"
 sudo mv composer.phar /usr/local/bin/composer
 
 echo -e "$Cyan \n Removing apache files $Color_Off"
-sudo rm /etc/php5/apache2/php.ini /etc/php5/cli/php.ini /etc/hosts
+# sudo rm /etc/php/apache2/php.ini /etc/php/cli/php.ini /etc/hosts
+sudo rm /etc/hosts
 
 echo -e "$Cyan \n Adding apache sites configuration $Color_Off"
-sudo cp /var/www/vagrant-stuffs/apache-conf/transmeo.conf /etc/apache2/sites-available/
+sudo cp /var/www/vagrant-stuffs/apache-conf/cardif.conf /etc/apache2/sites-available/
 
 echo -e "$Cyan \n Adding apache config files php.ini and hosts $Color_Off"
-sudo cp /var/www/vagrant-stuffs/apache-conf/cli-php.ini /etc/php5/cli/php.ini
-sudo cp /var/www/vagrant-stuffs/apache-conf/apache-php.ini /etc/php5/apache2/php.ini
+# sudo cp /var/www/vagrant-stuffs/apache-conf/cli-php.ini /etc/php/7.1/cli/php.ini
+# sudo cp /var/www/vagrant-stuffs/apache-conf/apache-php.ini /etc/php/7.1/apache2/php.ini
 sudo cp /var/www/vagrant-stuffs/apache-conf/hosts /etc/hosts
 
 echo -e "$Cyan \n Enabling apache sites $Color_Off"
-sudo a2ensite transmeo.conf
+sudo a2ensite cardif.conf
 sudo a2enmod rewrite
 sudo service apache2 restart
 
@@ -88,13 +77,28 @@ ssh-add ~/.ssh/id_rsa
 
 sudo apt-get install git -y
 
+## Installing ruby for SASS and Compass support
+echo -e "$Cyan \n Installing ruby for SASS and Compass support $Color_Off"
+sudo apt-get install ruby-full build-essential libssl-dev -y
+
+sudo gem update -f
+sudo gem install compass
+
+echo -e "$Cyan \n Installing Nodejs npm with nvm $Color_Off"
+curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh -o install_nvm.sh | bash
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+source ~/.profile
+nvm install 6.10
+
+echo -e "$Cyan \n NodeJS and npm install $Color_Off"
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+
+sudo npm install -g typescript gulp-cli concurrently typings grunt-cli bower cordova ionic pm2 forever express-generator nodemon@1.10.1 strongloop
+
 ssh-keyscan -H github.com >> ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
-
-cd /var/www/cardif
-
-npm install
-composer install
-bower install
 
 sudo service apache2 restart
 
