@@ -16,19 +16,22 @@ Cyan='\033[0;36m'         # Cyan
 sudo locale-gen
 sudo apt-get install vim
 
-echo -e "$Cyan \n Add php apt repository $Color_Off"
-sudo add-apt-repository ppa:ondrej/php -y
-sudo apt-get install python-software-properties
+sudo apt-get update && sudo apt-get upgrade
 
-# Update packages and Upgrade system
-echo -e "$Cyan \n Updating System.. $Color_Off"
-sudo apt-get update -y && sudo apt-get upgrade -y
+sudo apt-get install apache2 -y
 
 echo -e "$Cyan \n MySQL Config $Color_Off"
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password paris'
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password paris'
 sudo apt-get install -y mysql-server
 sudo mysqld --initialize
+# Create new MySQL user to access database
+mysql -uroot -pparis -e "CREATE DATABASE IF NOT EXISTS prestashop";
+mysql -uroot -pparis -e "CREATE USER 'iknsa'@'localhost' IDENTIFIED BY 'paris'";
+mysql -uroot -pparis -e "CREATE USER 'iknsa'@'%' IDENTIFIED BY 'paris'";
+mysql -uroot -pparis -e "GRANT ALL PRIVILEGES ON * . * TO 'iknsa'@'localhost'";
+mysql -uroot -pparis -e "GRANT ALL PRIVILEGES ON *. * TO 'iknsa'@'%'";
+mysql -uroot -pparis -e "FLUSH PRIVILEGES";
 
 ## Install LAMP
 echo -e "$Cyan \n Installing Apache2 $Color_Off"
@@ -36,70 +39,40 @@ sudo apt-get install apache2 -y
 sudo service apache2 restart
 
 echo -e "$Cyan \n Installing PHP extensions $Color_Off"
-sudo apt install --no-install-recommends php7.1 libapache2-mod-php7.1 php7.1-mysql php7.1-curl php7.1-json php7.1-gd php7.1-mcrypt php7.1-msgpack php7.1-memcached php7.1-intl php7.1-sqlite3 php7.1-gmp php7.1-geoip php7.1-mbstring php7.1-redis php7.1-xml php7.1-zip
-sudo apt-get install -y libcurl4-openssl-dev pkg-config libssl-dev libsslcommon2-dev curl libcurl4-doc libcurl3-dbg libidn11-dev libkrb5-dev libldap2-dev librtmp-dev php-cli php-dev php-common php-cgi
-
-#Install composer 
-php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('SHA384', 'composer-setup.php') === '669656bab3166a7aff8a7506b8cb2d1c292f042046c5a994c43155c0be6190fa0355160742ab2e1c88d40d5be660b410') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-php composer-setup.php
-php -r "unlink('composer-setup.php');"
-sudo mv composer.phar /usr/local/bin/composer
+sudo apt install -y --no-install-recommends php libapache2-mod-php php-mysql php-curl php-json php-gd php-mcrypt php-msgpack php-memcached php-intl php-sqlite3 php-gmp php-geoip php-mbstring php-redis php-xml php-zip
+#sudo apt install -y --no-install-recommends php5.6 libapache2-mod-php5.6 php5.6-mysql php5.6-curl php5.6-json php5.6-gd php5.6-mcrypt php5.6-msgpack php5.6-memcached php5.6-intl php5.6-sqlite3 php5.6-gmp php5.6-geoip php5.6-mbstring php5.6-redis php5.6-xml php5.6-zip
+sudo apt install -y libcurl4-openssl-dev pkg-config libssl-dev libsslcommon2-dev curl libcurl4-doc libcurl3-dbg libidn11-dev libkrb5-dev libldap2-dev librtmp-dev php-cli php-dev php-common php-cgi
 
 echo -e "$Cyan \n Removing apache files $Color_Off"
 # sudo rm /etc/php/apache2/php.ini /etc/php/cli/php.ini /etc/hosts
 sudo rm /etc/hosts
 
 echo -e "$Cyan \n Adding apache sites configuration $Color_Off"
-sudo cp /var/www/vagrant-stuffs/apache-conf/cardif.conf /etc/apache2/sites-available/
+sudo cp /var/www/vagrant-stuffs/apache-conf/iknsa.conf /etc/apache2/sites-available/
 
 echo -e "$Cyan \n Adding apache config files php.ini and hosts $Color_Off"
-# sudo cp /var/www/vagrant-stuffs/apache-conf/cli-php.ini /etc/php/7.1/cli/php.ini
-# sudo cp /var/www/vagrant-stuffs/apache-conf/apache-php.ini /etc/php/7.1/apache2/php.ini
+sudo cp /var/www/vagrant-stuffs/apache-conf/cli-php.ini /etc/php/7.3/cli/php.ini
+sudo cp /var/www/vagrant-stuffs/apache-conf/apache-php.ini /etc/php/7.3/apache2/php.ini
 sudo cp /var/www/vagrant-stuffs/apache-conf/hosts /etc/hosts
 
+#
+cd /home/ubuntu
+
+# Install PrestaShop
+echo "Instalando PrestaShop"
+echo "---------------------"
+mkdir /var/www/projects/prestashop
+cd /var/www/projects/prestashop
+sudo curl -O https://download.prestashop.com/download/releases/prestashop_1.7.2.1.zip
+sudo apt-get install unzip
+sudo unzip prestashop_1.7.2.1.zip
+sudo apt-get install php7.0-curl php7.0-gd php7.0-mysql php7.0-zip php7.0-xml php7.0-intl
+
+#mv prestashop/* .
+#rm Install_PrestaShop.html
+
 echo -e "$Cyan \n Enabling apache sites $Color_Off"
-sudo a2ensite cardif.conf
+sudo a2ensite iknsa.conf
 sudo a2enmod rewrite
 sudo service apache2 restart
 
-echo -e "$Cyan \n Adding rsa key to ssh agent $Color_Off"
-eval "$(ssh-agent -s)"
-mkdir -p ~/.ssh
-echo -e "$Cyan \n Copy rsa key to ssh folder $Color_Off"
-cp /var/www/vagrant-stuffs/id_rsa ~/.ssh
-echo -e "$Cyan \n Change rsa key mode to 400 $Color_Off"
-chmod 400 ~/.ssh/id_rsa
-echo -e "$Cyan \n Add rsa key to ssh agent $Color_Off"
-
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_rsa
-
-sudo apt-get install git -y
-
-## Installing ruby for SASS and Compass support
-echo -e "$Cyan \n Installing ruby for SASS and Compass support $Color_Off"
-sudo apt-get install ruby-full build-essential libssl-dev -y
-
-sudo gem update -f
-sudo gem install compass
-
-echo -e "$Cyan \n Installing Nodejs npm with nvm $Color_Off"
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.2/install.sh -o install_nvm.sh | bash
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-source ~/.profile
-nvm install 6.10
-
-echo -e "$Cyan \n NodeJS and npm install $Color_Off"
-sudo ln -s /usr/bin/nodejs /usr/bin/node
-
-sudo npm install -g typescript gulp-cli concurrently typings grunt-cli bower cordova ionic pm2 forever express-generator nodemon@1.10.1 strongloop
-
-ssh-keyscan -H github.com >> ~/.ssh/known_hosts && chmod 600 ~/.ssh/known_hosts
-
-sudo service apache2 restart
-
-exit;
